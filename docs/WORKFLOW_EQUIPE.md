@@ -92,7 +92,7 @@ git merge main
 
 ## 5. Communication
 
-- **Daily standup** : lundi/mercredi/vendredi sur Discord, 15min, 3 questions :
+- **Daily standup** : lundi, 15min, 3 questions :
   - Qu'est-ce que j'ai fait hier ?
   - Qu'est-ce que je fais aujourd'hui ?
   - Qu'est-ce qui me bloque ?
