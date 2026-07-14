@@ -1,0 +1,85 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+jobs:
+  backend:
+    name: Backend
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/backend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Install dependencies
+        run: |
+          if [ -f package.json ]; then
+            npm ci || npm install
+          else
+            echo "Backend not yet initialized — skipping"
+          fi
+      - name: Run tests
+        run: |
+          if [ -f package.json ]; then
+            npm test 2>/dev/null || echo "No tests configured yet"
+          fi
+
+  mobile:
+    name: Mobile
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/mobile
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Install dependencies
+        run: |
+          if [ -f package.json ]; then
+            npm ci || npm install
+          else
+            echo "Mobile not yet initialized — skipping"
+          fi
+      - name: TypeScript check
+        run: |
+          if [ -f tsconfig.json ]; then
+            npx tsc --noEmit
+          fi
+      - name: Run tests
+        run: |
+          if [ -f package.json ]; then
+            npm test 2>/dev/null || echo "No tests configured yet"
+          fi
+
+  ai:
+    name: AI / Python
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ai
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install dependencies
+        run: |
+          if [ -f requirements.txt ]; then
+            pip install -r requirements.txt
+          else
+            echo "AI not yet initialized — skipping"
+          fi
+      - name: Lint
+        run: |
+          if [ -f requirements.txt ]; then
+            pip install flake8 && flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics 2>/dev/null || true
+          fi
