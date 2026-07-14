@@ -2,3 +2,9 @@ node_modules/
 .expo/
 dist/
 .env
+
+# Python / IA
+venv/
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
