@@ -9,4 +9,11 @@ const registerSchema = z.object({
   }),
 });
 
-module.exports = { registerSchema };
+const loginSchema = z.object({
+  body: z.object({
+    email: z.string().email('Email invalide'),
+    password: z.string().min(6, 'Le mot de passe doit contenir au moins 6 caracteres'),
+  }),
+});
+
+module.exports = { registerSchema, loginSchema };
