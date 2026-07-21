@@ -40,7 +40,7 @@ jobs:
             exit 0
           fi
           cd apps/mobile
-          npm install
+          npm install --legacy-peer-deps
           npx tsc --noEmit 2>/dev/null || echo "TypeScript check skipped"
           npm test 2>/dev/null || echo "No tests yet"
 
