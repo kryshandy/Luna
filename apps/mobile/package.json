@@ -7,7 +7,7 @@
     "@react-native/jest-preset": "^0.86.0",
     "@react-navigation/bottom-tabs": "^7.18.8",
     "@react-navigation/native": "^7.3.8",
-    "@sentry/react-native": "~6.5.0",
+    "@sentry/react-native": "^8.19.0",
     "@types/jest": "29.5.14",
     "axios": "^1.18.1",
     "expo": "~57.0.4",
