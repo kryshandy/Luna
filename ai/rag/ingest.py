@@ -47,10 +47,20 @@ def chunk_document(text: str, source: str):
 
 
 def ingest_all():
+    """
+    Vide la base de connaissances existante puis réingère tous les documents
+    trouvés dans knowledge_base/raw/. Évite les doublons lors des relances
+    successives pendant le développement.
+    """
     files = glob.glob(str(KNOWLEDGE_BASE_DIR / "*.md"))
     if not files:
         print(f"Aucun fichier .md trouvé dans {KNOWLEDGE_BASE_DIR}")
         return
+
+    print("Nettoyage de la base existante avant réingestion...")
+    supabase.table("knowledge_chunks").delete().neq(
+        "id", "00000000-0000-0000-0000-000000000000"
+    ).execute()
 
     total_inserted = 0
     for filepath in files:
