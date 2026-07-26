@@ -22,6 +22,7 @@ async function login(req, res) {
       message: 'Connexion reussie',
       user: data.user,
       session: data.session,
+      profil: data.profil,
     });
   } catch (error) {
     res.status(401).json({ error: error.message });
