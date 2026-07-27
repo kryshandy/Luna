@@ -3,6 +3,8 @@ test_retrieval.py — Test du retrieval sur un échantillon de questions variée
 Vérifie que le bon passage (catégorie attendue) ressort bien en premier résultat.
 Sert de base pour calculer le "hit rate" mentionné dans les métriques du projet
 (section 14.1 de la doc : objectif > 85%).
+
+Catégories alignées sur la FAQ structurée de Krys (LUNA_FAQ_RAG_v1.0_draft.md).
 """
 
 import sys
@@ -17,19 +19,19 @@ from rag.retriever import retrieve
 TEST_CASES = [
     {
         "question": "J'ai mal au ventre pendant mes règles, c'est normal ?",
-        "expected_category": "Douleurs pendant les règles",
+        "expected_category": "symptômes · sensible",
     },
     {
         "question": "Mes règles ont deux semaines de retard, dois-je m'inquiéter ?",
-        "expected_category": "Retard de règles",
+        "expected_category": "cycle · sensible",
     },
     {
         "question": "Combien de temps dure un cycle normalement ?",
-        "expected_category": "Cycle menstruel",
+        "expected_category": "cycle · standard",
     },
     {
         "question": "Je me sens très mal, j'ai des pensées noires",
-        "expected_category": "Mode SOS - détresse émotionnelle",
+        "expected_category": "SOS · critique",
     },
     {
         "question": "Quelle est la capitale de la France ?",  # question hors-sujet volontaire
@@ -62,7 +64,12 @@ def run_tests():
         print(f"[{status}] Q{i}: {question}")
         print(f"      Attendu : {expected}")
         print(f"      Obtenu  : {top_category} (similarité={top_similarity:.3f})")
-        if not results:
+
+        if results:
+            print(f"      Top 3 résultats :")
+            for r in results:
+                print(f"        - {r['category']} (sim={r['similarity']:.3f}) : {r['content'][:60]}...")
+        else:
             print(f"      (aucun résultat retourné)")
         print()
 
