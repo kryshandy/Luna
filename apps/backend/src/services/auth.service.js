@@ -1,4 +1,13 @@
+const { createClient } = require('@supabase/supabase-js');
 const { supabase } = require('../config/supabaseClient');
+
+function getScopedClient(accessToken) {
+  return createClient(
+    process.env.SUPABASE_URL,
+    process.env.SUPABASE_ANON_KEY,
+    { global: { headers: { Authorization: `Bearer ${accessToken}` } } }
+  );
+}
 
 async function registerUser(email, password) {
   const { data, error } = await supabase.auth.signUp({ email, password });
@@ -6,8 +15,12 @@ async function registerUser(email, password) {
 
   // Enrichissement : creer la ligne profil applicative correspondante.
   // Le prenom/age/avatar seront completes plus tard via PUT /profil (ecran Inscription).
-  if (data.user) {
-    const { error: profilError } = await supabase
+  // On utilise un client scope avec le token de la nouvelle session,
+  // pour que la RLS (auth.uid() = id) accepte l'insertion.
+  if (data.user && data.session) {
+    const scopedClient = getScopedClient(data.session.access_token);
+
+    const { error: profilError } = await scopedClient
       .from('profils')
       .insert({ id: data.user.id, email: data.user.email, prenom: '' });
 
@@ -27,9 +40,12 @@ async function loginUser(email, password) {
 
   // Enrichissement de session : on joint le profil applicatif a la reponse de login,
   // pas seulement l'identite technique Supabase Auth.
+  // Client scope avec le token de session, pour que la RLS accepte la lecture.
   let profil = null;
-  if (data.user) {
-    const { data: profilData, error: profilError } = await supabase
+  if (data.user && data.session) {
+    const scopedClient = getScopedClient(data.session.access_token);
+
+    const { data: profilData, error: profilError } = await scopedClient
       .from('profils')
       .select('*')
       .eq('id', data.user.id)
