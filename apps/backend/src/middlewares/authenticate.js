@@ -1,7 +1,6 @@
+const { createClient } = require('@supabase/supabase-js');
 const { supabase } = require('../config/supabaseClient');
 
-// Verifie qu'une requete contient un token valide (Authorization: Bearer <token>)
-// et attache l'utilisatrice authentifiee a req.user pour les routes suivantes.
 async function authenticate(req, res, next) {
   const authHeader = req.headers.authorization;
 
@@ -17,6 +16,15 @@ async function authenticate(req, res, next) {
   }
 
   req.user = data.user;
+
+  // Client Supabase "scope" a cette requete : porte le token de l'utilisatrice,
+  // pour que la RLS (auth.uid()) fonctionne correctement pour SES donnees.
+  req.supabase = createClient(
+    process.env.SUPABASE_URL,
+    process.env.SUPABASE_ANON_KEY,
+    { global: { headers: { Authorization: `Bearer ${token}` } } }
+  );
+
   next();
 }
 
