@@ -39,3 +39,36 @@ export async function ajouterSymptome(
 export async function getSymptomesDuCycle(cycle: Cycle) {
   return cycle.symptomLogs.fetch();
 }
+
+export async function creerCyclesInitiaux(
+  database: Database,
+  data: {
+    lastPeriodStart: Date;
+    previousPeriodStart: Date;
+    cycleLength: number;
+    bleedLength: number;
+    regular: boolean;
+  }
+) {
+  const addDays = (date: Date, days: number) => new Date(date.getTime() + days * 86_400_000);
+
+  return database.write(async () => {
+    const cycles = database.get<Cycle>('cycles');
+
+    await cycles.create((cycle) => {
+      cycle.dateDebut = data.lastPeriodStart;
+      cycle.dateFin = addDays(data.lastPeriodStart, data.bleedLength);
+      cycle.duree = data.cycleLength;
+      cycle.reguliere = data.regular;
+      cycle.synced = false;
+    });
+
+    await cycles.create((cycle) => {
+      cycle.dateDebut = data.previousPeriodStart;
+      cycle.dateFin = addDays(data.previousPeriodStart, data.bleedLength);
+      cycle.duree = data.cycleLength;
+      cycle.reguliere = data.regular;
+      cycle.synced = false;
+    });
+  });
+}
