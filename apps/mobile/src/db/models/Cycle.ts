@@ -10,6 +10,7 @@ export default class Cycle extends Model {
   @date('date_debut') dateDebut: Date;
   @date('date_fin') dateFin?: Date;
   @field('duree') duree?: number;
+  @field('reguliere') reguliere?: boolean;
   @field('synced') synced: boolean;
   @readonly @date('created_at') createdAt: Date;
   @readonly @date('updated_at') updatedAt: Date;
