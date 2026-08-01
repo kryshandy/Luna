@@ -1,7 +1,7 @@
 const express = require('express');
-const { pingAuth, register, login, logout, me } = require('../controllers/auth.controller');
+const { pingAuth, register, login, logout, me, forgotPasswordHandler, resetPasswordHandler } = require('../controllers/auth.controller')
 const { validate } = require('../middlewares/validate');
-const { registerSchema, loginSchema } = require('../schemas/auth.schema');
+const { registerSchema, loginSchema, forgotPasswordSchema, resetPasswordSchema } = require('../schemas/auth.schema');
 const { authenticate } = require('../middlewares/authenticate');
 
 const router = express.Router();
@@ -91,5 +91,49 @@ router.post('/logout', logout);
  *         description: Token manquant ou invalide
  */
 router.get('/me', authenticate, me);
+
+/**
+ * @openapi
+ * /auth/forgot-password:
+ *   post:
+ *     summary: Envoie un email de recuperation de mot de passe
+ *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               email: { type: string }
+ *     responses:
+ *       200:
+ *         description: Message generique (envoye ou non, non revele)
+ */
+router.post('/forgot-password', validate(forgotPasswordSchema), forgotPasswordHandler);
+
+/**
+ * @openapi
+ * /auth/reset-password:
+ *   post:
+ *     summary: Reinitialise le mot de passe avec le code recu par email
+ *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               email: { type: string }
+ *               otp: { type: string }
+ *               newPassword: { type: string }
+ *     responses:
+ *       200:
+ *         description: Mot de passe modifie avec succes
+ *       400:
+ *         description: Code invalide ou expire
+ */
+router.post('/reset-password', validate(resetPasswordSchema), resetPasswordHandler);
 
 module.exports = router;

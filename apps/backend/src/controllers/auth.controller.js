@@ -1,4 +1,4 @@
-const { registerUser, loginUser, logoutUser } = require('../services/auth.service');
+const { registerUser, loginUser, logoutUser, forgotPassword, resetPassword } = require('../services/auth.service');
 
 function pingAuth(req, res) {
   res.json({ message: 'Auth controller pret.' });
@@ -38,4 +38,25 @@ function me(req, res) {
   res.status(200).json({ user: req.user });
 }
 
-module.exports = { pingAuth, register, login, logout, me };
+async function forgotPasswordHandler(req, res) {
+  try {
+    const { email } = req.body;
+    const result = await forgotPassword(email);
+    res.status(200).json(result);
+  } catch (error) {
+    // Meme en cas d'erreur inattendue, on reste generique cote client.
+    res.status(200).json({ message: 'Si un compte existe avec cet email, un code de recuperation a ete envoye.' });
+  }
+}
+
+async function resetPasswordHandler(req, res) {
+  try {
+    const { email, otp, newPassword } = req.body;
+    const result = await resetPassword(email, otp, newPassword);
+    res.status(200).json(result);
+  } catch (error) {
+    res.status(error.status || 400).json({ error: error.message });
+  }
+}
+
+module.exports = { pingAuth, register, login, logout, me, forgotPasswordHandler, resetPasswordHandler };

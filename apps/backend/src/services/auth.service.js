@@ -66,4 +66,42 @@ async function logoutUser() {
   return { message: 'Deconnexion reussie. Le token doit etre supprime cote client.' };
 }
 
-module.exports = { registerUser, loginUser, logoutUser };
+async function forgotPassword(email) {
+  const { data, error } = await supabase.auth.resetPasswordForEmail(email);
+  if (error) {
+    console.error('DEBUG - Erreur resetPasswordForEmail :', error.message, error);
+  } else {
+    console.log('DEBUG - resetPasswordForEmail OK, data:', data);
+  }
+  return { message: 'Si un compte existe avec cet email, un code de recuperation a ete envoye.' };
+}
+
+async function resetPassword(email, otp, newPassword) {
+  const { data, error } = await supabase.auth.verifyOtp({
+    email,
+    token: otp,
+    type: 'recovery',
+  });
+
+  if (error || !data.session) {
+    const err = new Error('Code invalide ou expire');
+    err.status = 400;
+    throw err;
+  }
+
+  // Le client scope a besoin d'une vraie session active (pas juste un header)
+  // pour que les methodes internes du module auth (updateUser) fonctionnent.
+  const scopedClient = getScopedClient(data.session.access_token);
+  await scopedClient.auth.setSession({
+    access_token: data.session.access_token,
+    refresh_token: data.session.refresh_token,
+  });
+
+  const { error: updateError } = await scopedClient.auth.updateUser({ password: newPassword });
+
+  if (updateError) throw updateError;
+
+  return { message: 'Mot de passe modifie avec succes.' };
+}
+
+module.exports = { registerUser, loginUser, logoutUser, forgotPassword, resetPassword };
